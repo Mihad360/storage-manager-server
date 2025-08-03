@@ -7,10 +7,14 @@ const userSchema = new Schema<IUser, UserModel>(
   {
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    totalStorage: { type: Number, default: 15 * 1024 * 1024 * 1024 },
     usedStorage: { type: Number, default: 0 },
     name: { type: String, required: true },
     profileImage: { type: String },
     role: { type: String },
+    otp: { type: String, default: null },
+    expiresAt: { type: Date, default: null },
+    isVerified: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },
   },
   {

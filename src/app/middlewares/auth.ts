@@ -1,4 +1,4 @@
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt, { JwtPayload as jwtPayload } from "jsonwebtoken";
 import HttpStatus from "http-status";
 import { NextFunction, Request, Response } from "express";
 import catchAsync from "../utils/catchAsync";
@@ -6,6 +6,7 @@ import AppError from "../erros/AppError";
 import config from "../config";
 import { User } from "../modules/User/user.model";
 import { TUserRole } from "../interface/global";
+import { JwtPayload } from "../interface/global";
 
 const auth = (...requiredRoles: TUserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -19,7 +20,7 @@ const auth = (...requiredRoles: TUserRole[]) => {
       decoded = jwt.verify(
         token,
         config.jwt_access_secret as string,
-      ) as JwtPayload;
+      ) as jwtPayload;
     } catch (error) {
       console.log(error);
       throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");

@@ -6,7 +6,6 @@ import { IAuth } from "./auth.interface";
 import { JwtPayload } from "../../interface/global";
 import { createToken } from "../../utils/jwt";
 import { sendEmail } from "../../utils/sendEmail";
-import { OtpModel } from "../Otp/otp.model";
 import { checkOtp } from "../../utils/Otp/otp";
 
 const loginUser = async (payload: IAuth) => {
@@ -67,17 +66,14 @@ const forgetPassword = async (email: string) => {
 
   const generateOtp = Math.floor(100000 + Math.random() * 900000).toString();
   const expireAt = new Date(Date.now() + 5 * 60 * 1000);
-  const userInfo = {
-    otp: generateOtp,
-    expiresAt: expireAt,
-    email: user.email,
-  };
-  const newUser = await OtpModel.findOneAndUpdate(
+  const newUser = await User.findOneAndUpdate(
     { email: user.email },
     {
-      ...userInfo,
+      otp: generateOtp,
+      expiresAt: expireAt,
+      isVerified: false,
     },
-    { new: true, upsert: true },
+    { new: true },
   );
   if (newUser) {
     const subject = "Verification Code";
@@ -104,12 +100,17 @@ const verifyOtp = async (payload: { email: string; otp: string }) => {
   if (user?.isDeleted) {
     throw new AppError(HttpStatus.FORBIDDEN, "This User is deleted");
   }
-  const isOtpExist = await OtpModel.findOne({ email: user.email });
-  if (!isOtpExist) {
-    throw new AppError(HttpStatus.NOT_FOUND, "The users Otp did not found");
-  }
-  if (new Date(isOtpExist.expiresAt) < new Date()) {
-    await OtpModel.findOneAndDelete({ email: user.email });
+
+  if (user.expiresAt && new Date(user.expiresAt) < new Date()) {
+    await User.findOneAndUpdate(
+      { email: user.email },
+      {
+        otp: null,
+        expiresAt: null,
+        isVerified: false,
+      },
+      { new: true },
+    );
     throw new AppError(
       HttpStatus.BAD_REQUEST,
       "The Otp has expired. Try again!",
@@ -132,6 +133,9 @@ const resetPassword = async (payload: {
   }
   if (user?.isDeleted) {
     throw new AppError(HttpStatus.FORBIDDEN, "This User is deleted");
+  }
+  if (!user.isVerified) {
+    throw new AppError(HttpStatus.BAD_REQUEST, "You are not verified");
   }
 
   const newHashedPassword = await User.newHashedPassword(payload.newPassword);
