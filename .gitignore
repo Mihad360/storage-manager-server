@@ -5,4 +5,3 @@ dist
 './uploads'
 './src/app/builder'
 './src/app/modules'
-hello

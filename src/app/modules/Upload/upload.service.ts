@@ -45,6 +45,8 @@ const uploadFile = async (user: JwtPayload, file: any, payload: IFile) => {
   return result;
 };
 
+
+
 export const uploadServices = {
   uploadFile,
 };
