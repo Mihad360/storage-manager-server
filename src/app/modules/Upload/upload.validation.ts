@@ -2,7 +2,7 @@ import { z } from "zod";
 
 const uploadFileValidation = z.object({
   body: z.object({
-    filename: z.string().min(1, "Filename is required").optional(),
+    filename: z.string().optional(),
     type: z
       .enum(["pdf", "note", "image", "folder"], {
         message: "The type is missing or invalid",

@@ -52,11 +52,14 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + "-" + uniqueSuffix);
+    // Extract original extension including the dot, e.g., ".pdf"
+    const ext = path.extname(file.originalname);
+    // Save with fieldname + uniqueSuffix + original extension
+    cb(null, file.fieldname + "-" + uniqueSuffix + ext);
   },
 });
 
-export const upload = multer({ storage: storage });
+export const upload = multer({ storage });
 
 // import HttpStatus from "http-status";
 // import { v2 as cloudinary, UploadApiResponse } from "cloudinary";

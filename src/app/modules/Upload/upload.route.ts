@@ -7,6 +7,31 @@ import auth from "../../middlewares/auth";
 
 const router = express.Router();
 
+router.get(
+  "/my-uploads",
+  auth("admin", "user"),
+  uploadControllers.getMyUploads,
+);
+router.get(
+  "/open-file/:filename",
+  auth("admin", "user"),
+  uploadControllers.openSpeceficFile,
+);
+router.get(
+  "/favourites",
+  auth("admin", "user"),
+  uploadControllers.getFavourites,
+);
+router.post(
+  "/add-to-favourite/:id",
+  auth("admin", "user"),
+  uploadControllers.addToFavourite,
+);
+router.post(
+  "/unfavourite/:id",
+  auth("admin", "user"),
+  uploadControllers.unFavourite,
+);
 router.post(
   "/file-upload",
   auth("admin", "user"),
