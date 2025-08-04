@@ -1,3 +1,4 @@
+import bcrypt from "bcrypt";
 import HttpStatus from "http-status";
 import config from "../../config";
 import AppError from "../../erros/AppError";
@@ -7,6 +8,7 @@ import { JwtPayload } from "../../interface/global";
 import { createToken } from "../../utils/jwt";
 import { sendEmail } from "../../utils/sendEmail";
 import { checkOtp } from "../../utils/Otp/otp";
+import { Types } from "mongoose";
 
 const loginUser = async (payload: IAuth) => {
   const user = await User.findOne({
@@ -44,6 +46,7 @@ const loginUser = async (payload: IAuth) => {
   );
 
   return {
+    role: user.role,
     accessToken,
   };
 };
@@ -149,9 +152,44 @@ const resetPassword = async (payload: {
   return updateUser;
 };
 
+const changePassword = async (
+  userId: string | Types.ObjectId,
+  payload: { currentPassword: string; newPassword: string },
+) => {
+  const id = new Types.ObjectId(userId);
+  const user = await User.findById(id).select("+password");
+  if (!user) {
+    throw new AppError(HttpStatus.NOT_FOUND, "User not found");
+  }
+  if (user.isDeleted) {
+    throw new AppError(HttpStatus.FORBIDDEN, "User is blocked");
+  }
+  if (!payload.currentPassword || !payload.newPassword) {
+    throw new AppError(HttpStatus.BAD_REQUEST, "Password is missing");
+  }
+  // 2. Verify current password
+  const isMatch = await bcrypt.compare(payload.currentPassword, user.password);
+  if (!isMatch) {
+    throw new AppError(
+      HttpStatus.UNAUTHORIZED,
+      "Current password is incorrect",
+    );
+  }
+  const newPass = await bcrypt.hash(payload.newPassword, 12);
+  const result = await User.findByIdAndUpdate(
+    user._id,
+    {
+      password: newPass,
+    },
+    { new: true },
+  );
+  return result;
+};
+
 export const authServices = {
   loginUser,
   forgetPassword,
   resetPassword,
   verifyOtp,
+  changePassword,
 };

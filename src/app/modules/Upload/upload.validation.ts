@@ -4,7 +4,7 @@ const uploadFileValidation = z.object({
   body: z.object({
     filename: z.string().optional(),
     type: z
-      .enum(["pdf", "note", "image", "folder"], {
+      .enum(["pdf", "note", "image"], {
         message: "The type is missing or invalid",
       })
       .optional(),

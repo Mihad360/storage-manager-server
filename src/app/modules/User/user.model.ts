@@ -1,3 +1,4 @@
+import { formatBytes } from "./../../utils/FormatBytes/FormatBytes";
 import { model, Schema } from "mongoose";
 import { IUser, UserModel } from "./user.interface";
 import bcrypt from "bcrypt";
@@ -13,12 +14,17 @@ const userSchema = new Schema<IUser, UserModel>(
     profileImage: { type: String },
     role: { type: String },
     otp: { type: String, default: null },
+    isPrivatePinSet: { type: Boolean, default: false },
+    privatePin: { type: String, default: null },
     expiresAt: { type: Date, default: null },
     isVerified: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true, versionKey: false },
+    toObject: { virtuals: true },
+    id: false,
   },
 );
 
@@ -49,5 +55,11 @@ userSchema.statics.newHashedPassword = async function (newPassword: string) {
   );
   return newPass;
 };
+
+userSchema.virtual("availableStorage").get(function () {
+  const available = this.totalStorage - this.usedStorage;
+  const availableByte = formatBytes(available);
+  return availableByte;
+});
 
 export const User = model<IUser, UserModel>("User", userSchema);

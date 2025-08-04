@@ -5,11 +5,14 @@ export interface IUser {
   email: string;
   password: string;
   totalStorage: number;
+  availableStorage?: number;
   usedStorage: number; // in bytes or MB/GB based on your system
   name: string;
   profileImage?: string;
   role?: string;
   otp?: string;
+  isPrivatePinSet?: boolean;
+  privatePin?: string;
   expiresAt?: Date;
   isVerified?: boolean;
   createdAt: Date;

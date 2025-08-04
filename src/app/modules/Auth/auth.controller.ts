@@ -2,10 +2,11 @@ import HttpStatus from "http-status";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { authServices } from "./auth.service";
+import { JwtPayload } from "../../interface/global";
 
 const loginUser = catchAsync(async (req, res) => {
   const result = await authServices.loginUser(req.body);
-  const { accessToken } = result;
+  const { accessToken, role } = result;
 
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
@@ -19,6 +20,7 @@ const loginUser = catchAsync(async (req, res) => {
     success: true,
     message: "Login succesfully",
     data: {
+      role,
       accessToken,
     },
   });
@@ -57,9 +59,22 @@ const resetPassword = catchAsync(async (req, res) => {
   });
 });
 
+const changePassword = catchAsync(async (req, res) => {
+  const user = req.user as JwtPayload;
+  const result = await authServices.changePassword(user.user, req.body);
+
+  sendResponse(res, {
+    statusCode: HttpStatus.OK,
+    success: true,
+    message: "reset password succesfully",
+    data: result,
+  });
+});
+
 export const authControllers = {
   loginUser,
   forgetPassword,
   resetPassword,
   verifyOtp,
+  changePassword,
 };

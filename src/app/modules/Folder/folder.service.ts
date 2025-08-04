@@ -37,7 +37,10 @@ const getMyFolders = async (user: JwtPayload) => {
     throw new AppError(HttpStatus.NOT_FOUND, "The user does not exist");
   }
 
-  const result = await FolderModel.find({ user: isUserExist._id });
+  const result = await FolderModel.find({
+    user: isUserExist._id,
+    isDeleted: false,
+  });
   return result;
 };
 
@@ -54,12 +57,30 @@ const getSpeceficFoldersFile = async (user: JwtPayload, id: string) => {
   const folderFiles = await UploadModel.find({
     parentId: isFolderExist._id,
     user: isUserExist._id,
+    isDeleted: false,
   });
   return folderFiles;
+};
+
+const deleteFolder = async (id: string) => {
+  const folder = await FolderModel.findById(id);
+  if (!folder) {
+    throw new AppError(HttpStatus.NOT_FOUND, "User not found");
+  }
+
+  const result = await FolderModel.findByIdAndUpdate(
+    folder._id,
+    {
+      isDeleted: true,
+    },
+    { new: true },
+  );
+  return result;
 };
 
 export const folderServices = {
   createFolder,
   getMyFolders,
   getSpeceficFoldersFile,
+  deleteFolder,
 };

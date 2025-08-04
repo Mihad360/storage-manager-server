@@ -41,8 +41,21 @@ const getSpeceficFoldersFile = catchAsync(async (req, res) => {
   });
 });
 
+const deleteFolder = catchAsync(async (req, res) => {
+  const id = req.params.id;
+  const result = await folderServices.deleteFolder(id);
+
+  sendResponse(res, {
+    statusCode: HttpStatus.OK,
+    success: true,
+    message: "createFolder succesfully",
+    data: result,
+  });
+});
+
 export const folderControllers = {
   createFolder,
   getMyFolders,
   getSpeceficFoldersFile,
+  deleteFolder,
 };

@@ -19,5 +19,10 @@ router.get(
   auth("admin", "user"),
   folderControllers.getSpeceficFoldersFile,
 );
+router.patch(
+  "/delete-folder/:id",
+  auth("admin", "user"),
+  folderControllers.deleteFolder,
+);
 
 export const folderRoutes = router;

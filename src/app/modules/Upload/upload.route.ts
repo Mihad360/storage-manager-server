@@ -13,7 +13,12 @@ router.get(
   uploadControllers.getMyUploads,
 );
 router.get(
-  "/open-file/:filename",
+  "/my-private-uploads",
+  auth("admin", "user"),
+  uploadControllers.getMyPrivateUploads,
+);
+router.get(
+  "/open-file/:id",
   auth("admin", "user"),
   uploadControllers.openSpeceficFile,
 );
@@ -22,10 +27,30 @@ router.get(
   auth("admin", "user"),
   uploadControllers.getFavourites,
 );
+router.patch(
+  "/rename-file/:id",
+  auth("admin", "user"),
+  uploadControllers.renameFile,
+);
 router.post(
   "/add-to-favourite/:id",
   auth("admin", "user"),
   uploadControllers.addToFavourite,
+);
+router.post(
+  "/duplicate-file/:id",
+  auth("admin", "user"),
+  uploadControllers.duplicateFile,
+);
+router.post(
+  "/share-file/:id",
+  auth("admin", "user"),
+  uploadControllers.shareFileLink,
+);
+router.post(
+  "/delete-file/:id",
+  auth("admin", "user"),
+  uploadControllers.deleteFile,
 );
 router.post(
   "/unfavourite/:id",
@@ -42,6 +67,17 @@ router.post(
   },
   validateRequest(uploadValidations.uploadFileValidation),
   uploadControllers.uploadFile,
+);
+router.post(
+  "/private-file-upload",
+  auth("admin", "user"),
+  upload.single("file"),
+  (req: Request, res: Response, next: NextFunction) => {
+    req.body = JSON.parse(req.body.data);
+    next();
+  },
+  validateRequest(uploadValidations.uploadFileValidation),
+  uploadControllers.uploadPrivateFile,
 );
 
 export const uploadRoutes = router;

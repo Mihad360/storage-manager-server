@@ -1,16 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import path from "path";
 import HttpStatus from "http-status";
 import AppError from "../../erros/AppError";
 import { JwtPayload } from "../../interface/global";
 import { User } from "../User/user.model";
 import { IFile } from "./upload.interface";
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { UploadModel } from "./upload.model";
 import QueryBuilder from "../../builder/QueryBuilder";
 import { sendImageToCloudinary } from "../../utils/sendImageToCloudinary";
 
-const fileTypes = ["pdf", "note", "image", "folder"];
+const fileTypes = ["pdf", "note", "image"];
 
 const uploadFile = async (user: JwtPayload, file: any, payload: IFile) => {
   const isUserExist = await User.findById(user.user);
@@ -23,6 +22,10 @@ const uploadFile = async (user: JwtPayload, file: any, payload: IFile) => {
       "The file type is missing or invalid",
     );
   }
+
+  const totalStorage = isUserExist.totalStorage;
+  const presentStorage = isUserExist.usedStorage;
+
   const isImage = payload.type === "image";
   if (file) {
     console.log(file);
@@ -30,23 +33,39 @@ const uploadFile = async (user: JwtPayload, file: any, payload: IFile) => {
     const newDate = new Date();
     payload.uploadDate = newDate.toISOString().split("T")[0];
     payload.parentId = payload.parentId ? payload.parentId : null;
-    const ext = path.extname(file.originalname);
-    const baseName = path.basename(file.originalname, ext);
+    // const ext = path.extname(file.originalname);
+    // const baseName = path.basename(file.originalname, ext);
     payload.folderName = file.originalname;
     payload.size = file.size;
 
     if (isImage) {
-      const { path } = file;
-      const imageName = baseName;
-      const imageFile = await sendImageToCloudinary(imageName, path);
-      payload.filename = imageFile.original_filename as string;
-      payload.path = imageFile.secure_url as string;
+      // const { path } = file;
+      const imageName = file.originalname;
+      const imageFile = await sendImageToCloudinary(imageName, file.buffer);
+      // payload.filename = file.filename;
+      payload.live_link = imageFile.secure_url as string;
+      // payload.path = path;
       // console.log(imageFile);
     } else {
       const fileName = file.filename;
       payload.filename = fileName;
-      payload.path = file.path;
+      // payload.path = file.path;
+      const newFileName = file.originalname;
+      const fileDetails = await sendImageToCloudinary(newFileName, file.buffer);
+      payload.live_link = fileDetails.secure_url as string;
+      // console.log(fileDetails);
     }
+
+    const trackPresentStorage = presentStorage + file.size;
+    // console.log(totalStorage, trackPresentStorage);
+
+    if (totalStorage < file.size) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Not enough storage");
+    }
+    if (trackPresentStorage > totalStorage) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Not enough storage");
+    }
+
     await User.findByIdAndUpdate(
       user.user,
       {
@@ -54,10 +73,12 @@ const uploadFile = async (user: JwtPayload, file: any, payload: IFile) => {
       },
       { new: true },
     );
-  }
 
-  const result = await UploadModel.create(payload);
-  return result;
+    const result = await UploadModel.create(payload);
+    return result;
+  } else {
+    throw new AppError(HttpStatus.BAD_REQUEST, "Please provide a valid file");
+  }
 };
 
 const getMyUploads = async (
@@ -70,7 +91,7 @@ const getMyUploads = async (
   }
 
   const uploadQuery = new QueryBuilder(
-    UploadModel.find({ user: user.user }),
+    UploadModel.find({ user: user.user, isPrivate: false, isDeleted: false }),
     query,
   ).filter();
   const meta = await uploadQuery.countTotal();
@@ -79,27 +100,38 @@ const getMyUploads = async (
   return { meta, result };
 };
 
-const openSpeceficFile = async (filename: string) => {
-  const isFileExist = await UploadModel.findOne({ filename: filename });
+const getMyPrivateUploads = async (
+  query: Record<string, unknown>,
+  user: JwtPayload,
+) => {
+  const isUserExist = await User.findById(user.user);
+  if (!isUserExist) {
+    throw new AppError(HttpStatus.NOT_FOUND, "The user is not exist");
+  }
+
+  const uploadQuery = new QueryBuilder(
+    UploadModel.find({ user: user.user, isPrivate: true, isDeleted: false }),
+    query,
+  ).filter();
+  const meta = await uploadQuery.countTotal();
+  const result = await uploadQuery.modelQuery;
+
+  return { meta, result };
+};
+
+const openSpeceficFile = async (id: string, user: JwtPayload) => {
+  const isFileExist = await UploadModel.findById(id);
   if (!isFileExist) {
     throw new AppError(HttpStatus.NOT_FOUND, "The file is not exist");
   }
-  let fileUrl = "";
-
-  const fileType = isFileExist.type;
-
-  if (fileType === "image") {
-    // Serve from cloudinary or wherever the image is hosted
-    fileUrl = isFileExist.path as string;
-  } else if (fileType === "pdf" || fileType === "note") {
-    // Viewable inline link for PDF or TXT
-    fileUrl = `http://localhost:5000/view-file/${filename}`;
-  } else {
-    // Default download link (static serving)
-    fileUrl = `http://localhost:5000/uploads/${filename}`;
+  const userId = isFileExist?.user.toString();
+  if (userId !== user.user) {
+    throw new AppError(HttpStatus.NOT_FOUND, "This file is not belong to you");
   }
 
-  return fileUrl;
+  const fileName = isFileExist.folderName;
+  const liveLink = isFileExist.live_link;
+  return { fileName, liveLink };
 };
 
 const addToFavourite = async (id: string) => {
@@ -134,9 +166,214 @@ const unFavourite = async (id: string) => {
   return result;
 };
 
-const getFavourites = async () => {
-  const result = await UploadModel.find({ isFavourite: true });
+const getFavourites = async (user: JwtPayload) => {
+  const result = await UploadModel.find({
+    user: user.user,
+    isPrivate: false,
+    isFavourite: true,
+  });
   return result;
+};
+
+const renameFile = async (id: string, payload: Partial<IFile>) => {
+  const isUploadExist = await UploadModel.findById(id);
+  if (!isUploadExist) {
+    throw new AppError(HttpStatus.NOT_FOUND, "The file not found");
+  }
+
+  // Extract extension from the current name
+  const currentName = isUploadExist?.folderName; // e.g., 'hello.pdf'
+  const ext = currentName?.substring(currentName?.lastIndexOf(".")); // -> '.pdf'
+
+  const newName = payload.folderName ? payload.folderName + ext : currentName;
+  // Update in DB
+  const result = await UploadModel.findByIdAndUpdate(
+    id,
+    { folderName: newName },
+    { new: true },
+  );
+  return result;
+};
+
+const duplicateFile = async (id: string) => {
+  const isFileExist = await UploadModel.findById(id);
+  if (!isFileExist) {
+    throw new AppError(HttpStatus.NOT_FOUND, "The file not found");
+  }
+  const isUserExist = await User.findById(isFileExist?.user);
+  if (!isUserExist) {
+    throw new AppError(HttpStatus.NOT_FOUND, "The user not found");
+  }
+
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+
+    const fileSize = isFileExist.size as number;
+    const totalStorage = isUserExist.totalStorage;
+    const presentStorage = isUserExist.usedStorage;
+    const trackPresentStorage = presentStorage + fileSize;
+
+    if (totalStorage < fileSize) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Not enough storage");
+    }
+    if (trackPresentStorage > totalStorage) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Not enough storage");
+    }
+
+    const newDate = new Date();
+    const fileInfo = {
+      user: isFileExist.user,
+      type: isFileExist.type,
+      live_link: isFileExist.live_link,
+      folderName: isFileExist.folderName,
+      size: isFileExist.size,
+      uploadDate: newDate.toISOString().split("T")[0],
+      parentId: isFileExist.parentId ? isFileExist.parentId : null,
+    };
+    const result = await UploadModel.create([fileInfo], { session });
+
+    await User.findByIdAndUpdate(
+      isUserExist._id,
+      {
+        $inc: { usedStorage: fileSize },
+      },
+      { session, new: true },
+    );
+
+    await session.commitTransaction();
+    await session.endSession();
+    return result;
+  } catch (error) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new AppError(HttpStatus.BAD_REQUEST, error as any);
+  }
+};
+
+const shareFileLink = async (id: string) => {
+  const isFileExist = await UploadModel.findById(id);
+  if (!isFileExist) {
+    throw new AppError(HttpStatus.NOT_FOUND, "The file not found");
+  }
+  const liveLink = isFileExist.live_link;
+  return liveLink;
+};
+
+const deleteFile = async (id: string) => {
+  const isFileExist = await UploadModel.findById(id);
+  if (!isFileExist) {
+    throw new AppError(HttpStatus.NOT_FOUND, "The file not found");
+  }
+  const isUserExist = await User.findById(isFileExist?.user);
+  if (!isUserExist) {
+    throw new AppError(HttpStatus.NOT_FOUND, "The user not found");
+  }
+
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+
+    const fileSize = isFileExist.size as number;
+    await User.findByIdAndUpdate(
+      isUserExist._id,
+      {
+        $inc: { usedStorage: -fileSize },
+      },
+      { session, new: true },
+    );
+
+    const result = await UploadModel.findByIdAndUpdate(
+      id,
+      {
+        isDeleted: true,
+      },
+      { session, new: true },
+    );
+
+    await session.commitTransaction();
+    await session.endSession();
+    return result;
+  } catch (error) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new AppError(HttpStatus.BAD_REQUEST, error as any);
+  }
+};
+
+const uploadPrivateFile = async (
+  user: JwtPayload,
+  file: any,
+  payload: IFile,
+) => {
+  const isUserExist = await User.findById(user.user);
+  if (!isUserExist) {
+    throw new AppError(HttpStatus.NOT_FOUND, "The user is not exist");
+  }
+  if (!fileTypes.includes(payload.type)) {
+    throw new AppError(
+      HttpStatus.BAD_REQUEST,
+      "The file type is missing or invalid",
+    );
+  }
+
+  const totalStorage = isUserExist.totalStorage;
+  const presentStorage = isUserExist.usedStorage;
+
+  const isImage = payload.type === "image";
+  if (file) {
+    console.log(file);
+    payload.user = new Types.ObjectId(user.user);
+    payload.isPrivate = true;
+    const newDate = new Date();
+    payload.uploadDate = newDate.toISOString().split("T")[0];
+    payload.parentId = payload.parentId ? payload.parentId : null;
+    // const ext = path.extname(file.originalname);
+    // const baseName = path.basename(file.originalname, ext);
+    payload.folderName = file.originalname;
+    payload.size = file.size;
+
+    if (isImage) {
+      // const { path } = file;
+      const imageName = file.originalname;
+      const imageFile = await sendImageToCloudinary(imageName, file.buffer);
+      // payload.filename = file.filename;
+      payload.live_link = imageFile.secure_url as string;
+      // payload.path = path;
+      // console.log(imageFile);
+    } else {
+      const fileName = file.filename;
+      payload.filename = fileName;
+      // payload.path = file.path;
+      const newFileName = file.originalname;
+      const fileDetails = await sendImageToCloudinary(newFileName, file.buffer);
+      payload.live_link = fileDetails.secure_url as string;
+      // console.log(fileDetails);
+    }
+
+    const trackPresentStorage = presentStorage + file.size;
+    // console.log(totalStorage, trackPresentStorage);
+
+    if (totalStorage < file.size) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Not enough storage");
+    }
+    if (trackPresentStorage > totalStorage) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Not enough storage");
+    }
+
+    await User.findByIdAndUpdate(
+      user.user,
+      {
+        $inc: { usedStorage: file.size },
+      },
+      { new: true },
+    );
+
+    const result = await UploadModel.create(payload);
+    return result;
+  } else {
+    throw new AppError(HttpStatus.BAD_REQUEST, "Please provide a valid file");
+  }
 };
 
 export const uploadServices = {
@@ -146,4 +383,10 @@ export const uploadServices = {
   addToFavourite,
   unFavourite,
   getFavourites,
+  renameFile,
+  duplicateFile,
+  deleteFile,
+  shareFileLink,
+  uploadPrivateFile,
+  getMyPrivateUploads,
 };
