@@ -1086,7 +1086,7 @@
 		},
 		{
 			"key": "baseUrl",
-			"value": "",
+			"value": "http://localhost:5000/api/v1",
 			"type": "string"
 		},
 		{
