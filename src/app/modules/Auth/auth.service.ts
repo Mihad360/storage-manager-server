@@ -146,7 +146,7 @@ const resetPassword = async (payload: {
     { email: user.email },
     {
       password: newHashedPassword,
-      passwordChangedAt: new Date()
+      passwordChangedAt: new Date(),
     },
     { new: true },
   );
@@ -185,7 +185,10 @@ const changePassword = async (
     },
     { new: true },
   );
-  return result;
+  if (!result) {
+    throw new AppError(HttpStatus.UNAUTHORIZED, "Something went wrong");
+  }
+  return { message: "Change password successfull" };
 };
 
 export const authServices = {
