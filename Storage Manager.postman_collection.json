@@ -216,12 +216,13 @@
 									"const jsonData = pm.response.json();\r",
 									"\r",
 									"if (jsonData && jsonData.data.accessToken && jsonData.data.role === \"user\") {\r",
-									"    const bearerToken = jsonData.data.accessToken\r",
-									"    pm.environment.set(\"userToken\", bearerToken);\r",
+									"    const bearerToken = jsonData.data.accessToken;\r",
+									"    pm.collectionVariables.set(\"userToken\", bearerToken);\r",
 									"} else {\r",
-									"    const bearerToken = jsonData.data.accessToken\r",
-									"    pm.environment.set(\"adminToken\", bearerToken);\r",
-									"}"
+									"    const bearerToken = jsonData.data.accessToken;\r",
+									"    pm.collectionVariables.set(\"adminToken\", bearerToken);\r",
+									"}\r",
+									""
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -233,7 +234,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"ahmedmihad962@gmail.com\",\r\n    // \"email\": \"montasirmihad78@gmail.com\",\r\n    \"password\": \"123456\"\r\n}",
+							"raw": "{\r\n    // \"email\": \"ahmedmihad962@gmail.com\",\r\n    \"email\": \"montasirmihad78@gmail.com\",\r\n    \"password\": \"123456\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
