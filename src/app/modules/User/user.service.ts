@@ -41,6 +41,7 @@ const createUser = async (file: any, payload: IUser) => {
     );
 
     return {
+      role: result.role,
       accessToken,
     };
   }
@@ -58,7 +59,7 @@ const getMe = async (user: JwtPayload) => {
     throw new AppError(HttpStatus.NOT_FOUND, "The user is blocked");
   }
 
-  const formattedUser = formatUserStorage(isUserExist) as IUser;
+  const formattedUser = await formatUserStorage(isUserExist) as IUser;
   return formattedUser;
 };
 
@@ -112,6 +113,83 @@ const verifyPrivatePin = async (user: JwtPayload, payload: Partial<IUser>) => {
       throw new AppError(HttpStatus.BAD_REQUEST, "Invalid Pin");
     }
     return { message: "PIN verified" };
+  } else {
+    throw new AppError(HttpStatus.BAD_REQUEST, "Something went wrong!");
+  }
+};
+
+const changePrivatePin = async (
+  user: JwtPayload,
+  payload: { currentPin: number; newPin: number },
+) => {
+  const userId = new Types.ObjectId(user.user);
+  const isUserExist = await User.findById(userId);
+  if (!isUserExist) {
+    throw new AppError(HttpStatus.NOT_FOUND, "The user is not exist");
+  }
+  if (isUserExist.isDeleted) {
+    throw new AppError(HttpStatus.NOT_FOUND, "The user is blocked");
+  }
+  if (!isUserExist.privatePin) {
+    throw new AppError(HttpStatus.BAD_REQUEST, "Private pin not set");
+  }
+
+  const oldPin = payload.currentPin?.toString();
+  const newPrivatePin = payload.newPin?.toString();
+  if (oldPin && newPrivatePin) {
+    const isMatch = await bcrypt.compare(oldPin, isUserExist.privatePin);
+    if (!isMatch) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Invalid Pin");
+    }
+    if (newPrivatePin.length < 4 || newPrivatePin.length > 4) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Pin must be 4 character");
+    }
+    const hashedPin = await bcrypt.hash(newPrivatePin, 12);
+    const result = await User.findByIdAndUpdate(
+      isUserExist._id,
+      {
+        privatePin: hashedPin,
+        isPrivatePinSet: true,
+      },
+      { new: true },
+    );
+    return result;
+  } else {
+    throw new AppError(HttpStatus.BAD_REQUEST, "Something went wrong!");
+  }
+};
+
+const resetPrivatePin = async (
+  user: JwtPayload,
+  payload: { currentPin: number },
+) => {
+  const userId = new Types.ObjectId(user.user);
+  const isUserExist = await User.findById(userId);
+  if (!isUserExist) {
+    throw new AppError(HttpStatus.NOT_FOUND, "The user is not exist");
+  }
+  if (isUserExist.isDeleted) {
+    throw new AppError(HttpStatus.NOT_FOUND, "The user is blocked");
+  }
+  if (!isUserExist.privatePin) {
+    throw new AppError(HttpStatus.BAD_REQUEST, "Private pin not set");
+  }
+
+  const oldPin = payload.currentPin?.toString();
+  if (oldPin) {
+    const isMatch = await bcrypt.compare(oldPin, isUserExist.privatePin);
+    if (!isMatch) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Invalid Pin");
+    }
+    const result = await User.findByIdAndUpdate(
+      isUserExist._id,
+      {
+        privatePin: null,
+        isPrivatePinSet: false,
+      },
+      { new: true },
+    );
+    return result;
   } else {
     throw new AppError(HttpStatus.BAD_REQUEST, "Something went wrong!");
   }
@@ -181,4 +259,6 @@ export const userServices = {
   verifyPrivatePin,
   editUserProfile,
   deleteUser,
+  changePrivatePin,
+  resetPrivatePin,
 };

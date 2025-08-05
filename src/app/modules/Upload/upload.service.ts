@@ -28,37 +28,24 @@ const uploadFile = async (user: JwtPayload, file: any, payload: IFile) => {
 
   const isImage = payload.type === "image";
   if (file) {
-    console.log(file);
     payload.user = new Types.ObjectId(user.user);
     const newDate = new Date();
     payload.uploadDate = newDate.toISOString().split("T")[0];
     payload.parentId = payload.parentId ? payload.parentId : null;
-    // const ext = path.extname(file.originalname);
-    // const baseName = path.basename(file.originalname, ext);
     payload.folderName = file.originalname;
     payload.size = file.size;
 
     if (isImage) {
-      // const { path } = file;
       const imageName = file.originalname;
       const imageFile = await sendImageToCloudinary(imageName, file.buffer);
-      // payload.filename = file.filename;
       payload.live_link = imageFile.secure_url as string;
-      // payload.path = path;
-      // console.log(imageFile);
     } else {
-      const fileName = file.filename;
-      payload.filename = fileName;
-      // payload.path = file.path;
       const newFileName = file.originalname;
       const fileDetails = await sendImageToCloudinary(newFileName, file.buffer);
       payload.live_link = fileDetails.secure_url as string;
-      // console.log(fileDetails);
     }
 
     const trackPresentStorage = presentStorage + file.size;
-    // console.log(totalStorage, trackPresentStorage);
-
     if (totalStorage < file.size) {
       throw new AppError(HttpStatus.BAD_REQUEST, "Not enough storage");
     }
@@ -89,9 +76,9 @@ const getMyUploads = async (
   if (!isUserExist) {
     throw new AppError(HttpStatus.NOT_FOUND, "The user is not exist");
   }
-
+  const userId = new Types.ObjectId(user.user);
   const uploadQuery = new QueryBuilder(
-    UploadModel.find({ user: user.user, isPrivate: false, isDeleted: false }),
+    UploadModel.find({ user: userId, isPrivate: false, isDeleted: false }),
     query,
   ).filter();
   const meta = await uploadQuery.countTotal();
@@ -138,6 +125,9 @@ const addToFavourite = async (id: string) => {
   const isUploadExist = await UploadModel.findById(id);
   if (!isUploadExist) {
     throw new AppError(HttpStatus.NOT_FOUND, "Something went wrong");
+  }
+  if (isUploadExist.isPrivate) {
+    throw new AppError(HttpStatus.BAD_REQUEST, "This is a private file");
   }
 
   const result = await UploadModel.findByIdAndUpdate(
@@ -322,38 +312,26 @@ const uploadPrivateFile = async (
 
   const isImage = payload.type === "image";
   if (file) {
-    console.log(file);
+    // console.log(file);
     payload.user = new Types.ObjectId(user.user);
     payload.isPrivate = true;
     const newDate = new Date();
     payload.uploadDate = newDate.toISOString().split("T")[0];
     payload.parentId = payload.parentId ? payload.parentId : null;
-    // const ext = path.extname(file.originalname);
-    // const baseName = path.basename(file.originalname, ext);
     payload.folderName = file.originalname;
     payload.size = file.size;
 
     if (isImage) {
-      // const { path } = file;
       const imageName = file.originalname;
       const imageFile = await sendImageToCloudinary(imageName, file.buffer);
-      // payload.filename = file.filename;
       payload.live_link = imageFile.secure_url as string;
-      // payload.path = path;
-      // console.log(imageFile);
     } else {
-      const fileName = file.filename;
-      payload.filename = fileName;
-      // payload.path = file.path;
       const newFileName = file.originalname;
       const fileDetails = await sendImageToCloudinary(newFileName, file.buffer);
       payload.live_link = fileDetails.secure_url as string;
-      // console.log(fileDetails);
     }
 
     const trackPresentStorage = presentStorage + file.size;
-    // console.log(totalStorage, trackPresentStorage);
-
     if (totalStorage < file.size) {
       throw new AppError(HttpStatus.BAD_REQUEST, "Not enough storage");
     }
@@ -376,6 +354,15 @@ const uploadPrivateFile = async (
   }
 };
 
+const copyFile = async (id: string) => {
+  const isFileExist = await UploadModel.findById(id);
+  if (!isFileExist) {
+    throw new AppError(HttpStatus.NOT_FOUND, "File is not exist");
+  }
+  const copyId = isFileExist._id;
+  return copyId;
+};
+
 export const uploadServices = {
   uploadFile,
   getMyUploads,
@@ -389,4 +376,5 @@ export const uploadServices = {
   shareFileLink,
   uploadPrivateFile,
   getMyPrivateUploads,
+  copyFile,
 };

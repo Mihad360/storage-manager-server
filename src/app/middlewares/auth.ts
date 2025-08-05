@@ -26,7 +26,7 @@ const auth = (...requiredRoles: TUserRole[]) => {
       throw new AppError(HttpStatus.UNAUTHORIZED, "Unauthorized");
     }
 
-    const { role, email } = decoded;
+    const { role, email, iat } = decoded;
 
     const user = await User.isUserExistByEmail(email);
     if (!user) {
@@ -37,6 +37,13 @@ const auth = (...requiredRoles: TUserRole[]) => {
     }
 
     if (requiredRoles && !requiredRoles.includes(role)) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, "You are not authorized");
+    }
+
+    if (
+      user.passwordChangedAt &&
+      (await User.isOldTokenValid(user.passwordChangedAt, iat as number))
+    ) {
       throw new AppError(HttpStatus.UNAUTHORIZED, "You are not authorized");
     }
 

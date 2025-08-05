@@ -7,7 +7,7 @@ import auth from "../../middlewares/auth";
 
 const router = express.Router();
 
-router.patch("/delete/:id", auth("admin", "user"), userControllers.deleteUser);
+router.delete("/delete/:id", auth("admin", "user"), userControllers.deleteUser);
 router.get("/me", auth("admin", "user"), userControllers.getMe);
 router.patch(
   "/edit-user-profile/:id",
@@ -30,6 +30,16 @@ router.post(
   "/verify-private-pin",
   auth("admin", "user"),
   userControllers.verifyPrivatePin,
+);
+router.patch(
+  "/change-private-pin",
+  auth("admin", "user"),
+  userControllers.changePrivatePin,
+);
+router.post(
+  "/reset-private-pin",
+  auth("admin", "user"),
+  userControllers.resetPrivatePin,
 );
 router.post(
   "/create-user",

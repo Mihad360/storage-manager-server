@@ -51,6 +51,28 @@ const verifyPrivatePin = catchAsync(async (req, res) => {
     data: result,
   });
 });
+const changePrivatePin = catchAsync(async (req, res) => {
+  const user = req.user as JwtPayload;
+  const result = await userServices.changePrivatePin(user, req.body);
+
+  sendResponse(res, {
+    statusCode: HttpStatus.OK,
+    success: true,
+    message: "User created succesfully",
+    data: result,
+  });
+});
+const resetPrivatePin = catchAsync(async (req, res) => {
+  const user = req.user as JwtPayload;
+  const result = await userServices.resetPrivatePin(user, req.body);
+
+  sendResponse(res, {
+    statusCode: HttpStatus.OK,
+    success: true,
+    message: "User created succesfully",
+    data: result,
+  });
+});
 
 const editUserProfile = catchAsync(async (req, res) => {
   const id = req.params.id;
@@ -84,4 +106,6 @@ export const userControllers = {
   verifyPrivatePin,
   editUserProfile,
   deleteUser,
+  changePrivatePin,
+  resetPrivatePin,
 };

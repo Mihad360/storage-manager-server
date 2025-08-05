@@ -146,6 +146,7 @@ const resetPassword = async (payload: {
     { email: user.email },
     {
       password: newHashedPassword,
+      passwordChangedAt: new Date()
     },
     { new: true },
   );
@@ -180,6 +181,7 @@ const changePassword = async (
     user._id,
     {
       password: newPass,
+      passwordChangedAt: new Date(),
     },
     { new: true },
   );

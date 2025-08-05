@@ -153,6 +153,18 @@ const uploadPrivateFile = catchAsync(async (req, res) => {
   });
 });
 
+const copyFile = catchAsync(async (req, res) => {
+  const id = req.params.id;
+  const result = await uploadServices.copyFile(id);
+
+  sendResponse(res, {
+    statusCode: HttpStatus.OK,
+    success: true,
+    message: "File upload succesfully",
+    data: result,
+  });
+});
+
 export const uploadControllers = {
   uploadFile,
   getMyUploads,
@@ -166,4 +178,5 @@ export const uploadControllers = {
   shareFileLink,
   uploadPrivateFile,
   getMyPrivateUploads,
+  copyFile,
 };

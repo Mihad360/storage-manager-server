@@ -11,6 +11,27 @@
 			"item": [
 				{
 					"name": "create user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();\r",
+									"console.log(jsonData)\r",
+									"if (jsonData && jsonData.data.accessToken && jsonData.data.role === \"user\") {\r",
+									"    const bearerToken = jsonData.data.accessToken;\r",
+									"    pm.collectionVariables.set(\"userToken\", bearerToken);\r",
+									"} else {\r",
+									"    const bearerToken = jsonData.data.accessToken;\r",
+									"    pm.collectionVariables.set(\"adminToken\", bearerToken);\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -24,7 +45,7 @@
 								},
 								{
 									"key": "data",
-									"value": "{\n    \"name\": \"Mihad\",\n    \"email\": \"montasirmihad78@gmail.com\",\n    \"password\": \"123456\"\n}",
+									"value": "{\n    \"name\": \"Mihad\",\n    \"email\": \"mihadahmed@gmail.com\",\n    \"password\": \"123456\"\n}",
 									"type": "text"
 								}
 							]
@@ -43,7 +64,7 @@
 					"response": []
 				},
 				{
-					"name": "get me",
+					"name": "get me/accout-summary",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -106,7 +127,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiNjg5MDYwODNiYzE2ZjIzNTMwZmVjMTg5IiwibmFtZSI6IkpvaG4gRG9lIiwiZW1haWwiOiJtb250YXNpcm1paGFkNzhAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJwcm9maWxlSW1hZ2UiOiJodHRwczovL3Jlcy5jbG91ZGluYXJ5LmNvbS9kbXpteDk3d24vaW1hZ2UvdXBsb2FkL3YxNzU0MjkyMzU1L0pvaG4lMjBEb2UuanBnIiwiaXNEZWxldGVkIjpmYWxzZSwiaWF0IjoxNzU0MjkyMzU1LCJleHAiOjE3NTQ4OTcxNTV9.g-TrvMG4RbJKSU3saz7cZW389Obw3rzab618eXsLEfc",
+								"value": "{{userToken}}",
 								"type": "text"
 							}
 						],
@@ -127,6 +148,72 @@
 							"path": [
 								"user",
 								"verify-private-pin"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "change private pin",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{userToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"currentPin\": 1234,\r\n    \"newPin\": 4321\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/change-private-pin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"change-private-pin"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "reset private pin",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{userToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"currentPin\": 4321\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/reset-private-pin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"reset-private-pin"
 							]
 						}
 					},
@@ -175,7 +262,7 @@
 				{
 					"name": "delete user/account",
 					"request": {
-						"method": "PATCH",
+						"method": "DELETE",
 						"header": [
 							{
 								"key": "Authorization",
@@ -288,7 +375,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"montasirmihad78@gmail.com\",\r\n    \"otp\": \"361649\"\r\n}",
+							"raw": "{\r\n    \"email\": \"montasirmihad78@gmail.com\", // get email from localstorage or params or anywhere frontend depend\r\n    \"otp\": \"795869\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -351,7 +438,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"currentPassword\": \"456123\",\r\n    \"newPassword\": \"123456\"\r\n}",
+							"raw": "{\r\n    \"currentPassword\": \"123456\",\r\n    \"newPassword\": \"12345678\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -383,7 +470,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "{{adminToken}}",
+								"value": "{{userToken}}",
 								"type": "text"
 							}
 						],
@@ -419,7 +506,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "{{adminToken}}",
+								"value": "{{userToken}}",
 								"type": "text"
 							}
 						],
@@ -455,7 +542,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "{{adminToken}}",
+								"value": "{{userToken}}",
 								"type": "text"
 							}
 						],
@@ -485,7 +572,7 @@
 				{
 					"name": "delete folder",
 					"request": {
-						"method": "PATCH",
+						"method": "DELETE",
 						"header": [
 							{
 								"key": "Authorization",
@@ -519,7 +606,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "{{adminToken}}",
+								"value": "{{userToken}}",
 								"type": "text"
 							}
 						],
@@ -602,13 +689,23 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/upload/my-uploads",
+							"raw": "{{baseUrl}}/upload/my-uploads?uploadDate=2025-08-04&type=pdf",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"upload",
 								"my-uploads"
+							],
+							"query": [
+								{
+									"key": "uploadDate",
+									"value": "2025-08-04"
+								},
+								{
+									"key": "type",
+									"value": "pdf"
+								}
 							]
 						}
 					},
@@ -704,7 +801,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiNjg4ZjM4NTQ3MzdiZmViZmNhY2ZlZTBlIiwibmFtZSI6IkpvaG4gRG9lIiwiZW1haWwiOiJtb250YXNpcm1paGFkNzhAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJwcm9maWxlSW1hZ2UiOiJodHRwczovL3Jlcy5jbG91ZGluYXJ5LmNvbS9kbXpteDk3d24vaW1hZ2UvdXBsb2FkL3YxNzU0MTYwNjY4L0pvaG4lMjBEb2UuanBnIiwiaXNEZWxldGVkIjpmYWxzZSwiaWF0IjoxNzU0MjI1Njg1LCJleHAiOjE3NTQ4MzA0ODV9.UcZp7OqDX549ZtFAysQx84p2syRd4eh3_D011p57j7A",
+								"value": "{{userToken}}",
 								"type": "text"
 							}
 						],
@@ -802,7 +899,44 @@
 					"response": []
 				},
 				{
-					"name": "duplicate file",
+					"name": "copy file id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{userToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/upload/copy/689119b1e7db343e0d6f3db1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"upload",
+								"copy",
+								"689119b1e7db343e0d6f3db1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "paste/duplicate file",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -872,11 +1006,11 @@
 				{
 					"name": "delete file",
 					"request": {
-						"method": "POST",
+						"method": "DELETE",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "{{adminToken}}",
+								"value": "{{userToken}}",
 								"type": "text"
 							}
 						],

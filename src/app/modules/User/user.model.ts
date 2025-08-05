@@ -1,4 +1,3 @@
-import { formatBytes } from "./../../utils/FormatBytes/FormatBytes";
 import { model, Schema } from "mongoose";
 import { IUser, UserModel } from "./user.interface";
 import bcrypt from "bcrypt";
@@ -10,6 +9,10 @@ const userSchema = new Schema<IUser, UserModel>(
     password: { type: String, required: true },
     totalStorage: { type: Number, default: 15 * 1024 * 1024 * 1024 },
     usedStorage: { type: Number, default: 0 },
+    availableStorage: { type: Number, default: 0 },
+    pdfStorageSize: { type: String, default: 0 },
+    noteStorageSize: { type: String, default: 0 },
+    imageStorageSize: { type: String, default: 0 },
     name: { type: String, required: true },
     profileImage: { type: String },
     role: { type: String },
@@ -18,6 +21,7 @@ const userSchema = new Schema<IUser, UserModel>(
     privatePin: { type: String, default: null },
     expiresAt: { type: Date, default: null },
     isVerified: { type: Boolean, default: true },
+    passwordChangedAt: { type: Date, default: null },
     isDeleted: { type: Boolean, default: false },
   },
   {
@@ -56,10 +60,18 @@ userSchema.statics.newHashedPassword = async function (newPassword: string) {
   return newPass;
 };
 
-userSchema.virtual("availableStorage").get(function () {
-  const available = this.totalStorage - this.usedStorage;
-  const availableByte = formatBytes(available);
-  return availableByte;
-});
+// userSchema.virtual("availableStorage").get(function () {
+//   const available = this.totalStorage - this.usedStorage;
+//   const availableByte = formatBytes(available);
+//   return availableByte;
+// });
+
+userSchema.statics.isOldTokenValid = async function (
+  passwordChangedTime: Date,
+  jwtIssuedTime: number,
+) {
+  const passwordLastChangedAt = new Date(passwordChangedTime).getTime() / 1000;
+  return passwordLastChangedAt > jwtIssuedTime;
+};
 
 export const User = model<IUser, UserModel>("User", userSchema);

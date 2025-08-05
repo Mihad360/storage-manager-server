@@ -4,14 +4,12 @@ import { IFile } from "./upload.interface";
 const FileSchema = new Schema<IFile>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User" },
-    filename: { type: String },
     size: { type: Number },
     type: {
       type: String,
       enum: ["pdf", "note", "image"],
       required: true,
     },
-    path: { type: String },
     live_link: { type: String },
     folderName: { type: String },
     parentId: { type: Schema.Types.ObjectId, ref: "Upload", default: null },

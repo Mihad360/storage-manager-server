@@ -7,6 +7,7 @@ import auth from "../../middlewares/auth";
 
 const router = express.Router();
 
+router.get("/copy/:id", auth("admin", "user"), uploadControllers.copyFile);
 router.get(
   "/my-uploads",
   auth("admin", "user"),
@@ -47,7 +48,7 @@ router.post(
   auth("admin", "user"),
   uploadControllers.shareFileLink,
 );
-router.post(
+router.delete(
   "/delete-file/:id",
   auth("admin", "user"),
   uploadControllers.deleteFile,

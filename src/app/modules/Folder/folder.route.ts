@@ -19,7 +19,7 @@ router.get(
   auth("admin", "user"),
   folderControllers.getSpeceficFoldersFile,
 );
-router.patch(
+router.delete(
   "/delete-folder/:id",
   auth("admin", "user"),
   folderControllers.deleteFolder,
