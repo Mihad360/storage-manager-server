@@ -11,7 +11,7 @@ const createFolder = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "createFolder succesfully",
+    message: "Folder created successfully",
     data: result,
   });
 });
@@ -23,7 +23,7 @@ const getMyFolders = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "createFolder succesfully",
+    message: "Folders retrieved successfully",
     data: result,
   });
 });
@@ -36,7 +36,7 @@ const getSpeceficFoldersFile = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "createFolder succesfully",
+    message: "Folder files retrieved successfully",
     data: result,
   });
 });
@@ -48,7 +48,7 @@ const deleteFolder = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "createFolder succesfully",
+    message: "Folder deleted successfully",
     data: result,
   });
 });

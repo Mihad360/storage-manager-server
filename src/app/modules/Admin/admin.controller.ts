@@ -11,7 +11,7 @@ const allUser = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "reset password succesfully",
+    message: "Users retrieved successfully",
     data: result,
   });
 });
@@ -23,7 +23,7 @@ const allFolders = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "reset password succesfully",
+    message: "Folders retrieved successfully",
     data: result,
   });
 });
@@ -35,7 +35,7 @@ const allUploads = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "reset password succesfully",
+    message: "Uploads retrieved successfully",
     data: result,
   });
 });
@@ -48,7 +48,7 @@ const deleteUser = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "reset password succesfully",
+    message: "User deleted successfully",
     data: result,
   });
 });
@@ -61,7 +61,7 @@ const deleteFolder = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "reset password succesfully",
+    message: "Folder deleted successfully",
     data: result,
   });
 });
@@ -74,7 +74,7 @@ const deleteUpload = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "reset password succesfully",
+    message: "Upload deleted successfully",
     data: result,
   });
 });

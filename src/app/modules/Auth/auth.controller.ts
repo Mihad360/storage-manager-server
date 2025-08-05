@@ -18,7 +18,7 @@ const loginUser = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "Login succesfully",
+    message: "Logged in successfully",
     data: {
       role,
       accessToken,
@@ -32,7 +32,7 @@ const forgetPassword = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "forget password succesfully",
+    message: "Password reset email sent successfully",
     data: result,
   });
 });
@@ -43,7 +43,7 @@ const verifyOtp = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "Otp verified succesfully",
+    message: "OTP verified successfully",
     data: result,
   });
 });
@@ -54,7 +54,7 @@ const resetPassword = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "reset password succesfully",
+    message: "Password reset successfully",
     data: result,
   });
 });
@@ -66,7 +66,7 @@ const changePassword = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "reset password succesfully",
+    message: "Password changed successfully",
     data: result,
   });
 });

@@ -23,7 +23,7 @@ const getMe = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "User created succesfully",
+    message: "data retrieved",
     data: result,
   });
 });
@@ -35,7 +35,7 @@ const setPrivatePin = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "User created succesfully",
+    message: "Pin set succesfully",
     data: result,
   });
 });
@@ -47,7 +47,7 @@ const verifyPrivatePin = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "User created succesfully",
+    message: "Pin verified",
     data: result,
   });
 });
@@ -58,7 +58,7 @@ const changePrivatePin = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "User created succesfully",
+    message: "Private pin changed",
     data: result,
   });
 });
@@ -69,7 +69,7 @@ const resetPrivatePin = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "User created succesfully",
+    message: "Private pin reset succesfully",
     data: result,
   });
 });
@@ -82,7 +82,7 @@ const editUserProfile = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "User created succesfully",
+    message: "User edit succesfully",
     data: result,
   });
 });
@@ -94,7 +94,7 @@ const deleteUser = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "User created succesfully",
+    message: "User deleted succesfully",
     data: result,
   });
 });

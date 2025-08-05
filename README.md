@@ -17,12 +17,20 @@ A comprehensive file storage and management system built with Node.js, featuring
    npm install
    ```
 
-4. **Start the server**
+3. **Start the server**
 
    ```bash
    # Development
    npm run dev
 
+   ```
+
+4. **Server Live Link**
+
+```
+   https://storage-manager-server.vercel.app
+
+```
 
 ![Database Schema](https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Blank%20diagram-C5PSJQKRdXmVvDtRP17TjoQNHXHvTp.png)
 

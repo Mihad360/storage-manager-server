@@ -12,7 +12,7 @@ const uploadFile = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "File upload succesfully",
+    message: "File uploaded successfully",
     data: result,
   });
 });
@@ -24,7 +24,7 @@ const getMyUploads = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "File retrieved succesfully",
+    message: "Files retrieved successfully",
     meta: result.meta,
     data: result.result,
   });
@@ -37,7 +37,7 @@ const getMyPrivateUploads = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "File retrieved succesfully",
+    message: "Private files retrieved successfully",
     meta: result.meta,
     data: result.result,
   });
@@ -51,7 +51,7 @@ const openSpeceficFile = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "File retrieved succesfully",
+    message: "File accessed successfully",
     data: result,
   });
 });
@@ -63,7 +63,7 @@ const addToFavourite = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "File retrieved succesfully",
+    message: "File added to favorites successfully",
     data: result,
   });
 });
@@ -75,7 +75,7 @@ const unFavourite = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "File retrieved succesfully",
+    message: "File removed from favorites successfully",
     data: result,
   });
 });
@@ -87,7 +87,7 @@ const getFavourites = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "File retrieved succesfully",
+    message: "Favorite files retrieved successfully",
     data: result,
   });
 });
@@ -99,7 +99,7 @@ const renameFile = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "File retrieved succesfully",
+    message: "File renamed successfully",
     data: result,
   });
 });
@@ -111,7 +111,7 @@ const duplicateFile = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "File retrieved succesfully",
+    message: "File duplicated successfully",
     data: result,
   });
 });
@@ -123,7 +123,7 @@ const shareFileLink = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "File retrieved succesfully",
+    message: "File sharing link generated successfully",
     data: result,
   });
 });
@@ -135,7 +135,7 @@ const deleteFile = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "File retrieved succesfully",
+    message: "File deleted successfully",
     data: result,
   });
 });
@@ -148,7 +148,7 @@ const uploadPrivateFile = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "File upload succesfully",
+    message: "Private file uploaded successfully",
     data: result,
   });
 });
@@ -160,7 +160,7 @@ const copyFile = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: HttpStatus.OK,
     success: true,
-    message: "File upload succesfully",
+    message: "File copied successfully",
     data: result,
   });
 });
